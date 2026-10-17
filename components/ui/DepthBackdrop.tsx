@@ -69,7 +69,7 @@ export default function DepthBackdrop({ className = "" }: { className?: string }
           className="absolute inset-[-10%]"
           style={{
             background:
-              "radial-gradient(55% 45% at 72% 28%, rgba(127,177,216,0.32), transparent 70%)",
+              "radial-gradient(55% 45% at 72% 28%, rgba(127,177,216,0.5), transparent 70%)",
           }}
         />
       </div>
@@ -80,7 +80,7 @@ export default function DepthBackdrop({ className = "" }: { className?: string }
           className="absolute inset-x-[-15%] bottom-[-12%] h-[62%]"
           style={{
             backgroundImage:
-              "radial-gradient(rgba(242,247,251,0.22) 1px, transparent 1.6px)",
+              "radial-gradient(rgba(242,247,251,0.32) 1px, transparent 1.6px)",
             backgroundSize: "30px 30px",
             transform: "perspective(700px) rotateX(62deg)",
             transformOrigin: "50% 100%",
@@ -94,7 +94,7 @@ export default function DepthBackdrop({ className = "" }: { className?: string }
       <div className="absolute inset-0" style={plane(32)}>
         <div
           className="absolute right-[9%] top-[16%] hidden h-56 w-56 rounded-full border md:block"
-          style={{ borderColor: "rgba(173,208,236,0.28)" }}
+          style={{ borderColor: "rgba(173,208,236,0.4)" }}
         />
         <div
           className="absolute right-[17%] top-[30%] h-2.5 w-2.5 rounded-full bg-gold"

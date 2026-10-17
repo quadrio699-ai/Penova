@@ -42,6 +42,18 @@
     @apply underline-offset-4;
   }
 
+  /* Fine paper grain over the whole page: gives flat colours a tactile
+     surface. Sits under the intro and page transition, never blocks clicks. */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    pointer-events: none;
+    opacity: 0.09;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
   /* Visible keyboard focus everywhere, not just on :hover-capable pointers */
   :focus-visible {
     outline: 2px solid #2876ae;
@@ -72,6 +84,67 @@
   }
 }
 
+/* Atmosphere: slow fog drift and gentle doodle float */
+@keyframes fog-drift {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(6%, -4%, 0); }
+}
+@keyframes doodle-float {
+  from { transform: translateY(0); }
+  to { transform: translateY(-8px); }
+}
+.fog-drift {
+  animation: fog-drift 26s ease-in-out infinite alternate;
+  will-change: transform;
+}
+.fog-drift-slow {
+  animation: fog-drift 42s ease-in-out infinite alternate-reverse;
+  will-change: transform;
+}
+.doodle-float {
+  animation: doodle-float 6s ease-in-out infinite alternate;
+}
+
+/* Scroll-driven parallax for doodles: browsers that support it get depth as
+   they scroll, others simply show the doodles still. */
+@keyframes doodle-parallax {
+  from { transform: translateY(calc(var(--shift, 24) * 1px)); }
+  to { transform: translateY(calc(var(--shift, 24) * -1px)); }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .doodle-parallax {
+      animation: doodle-parallax linear both;
+      animation-timeline: view();
+    }
+  }
+}
+
+/* Hero 3D stack idle float */
+@keyframes hero-stack-float {
+  from { transform: translateY(0); }
+  to { transform: translateY(-10px); }
+}
+.hero-stack-float {
+  animation: hero-stack-float 7s ease-in-out infinite alternate;
+}
+
+/* Interactive doodles */
+@keyframes play-wiggle {
+  0%, 100% { transform: rotate(0) scale(1); }
+  25% { transform: rotate(-12deg) scale(1.18); }
+  60% { transform: rotate(9deg) scale(1.14); }
+}
+@keyframes play-burst {
+  from { transform: translate(0, 0) scale(1); opacity: 0.95; }
+  to { transform: translate(var(--bx), var(--by)) scale(0.3); opacity: 0; }
+}
+@keyframes play-caption {
+  0% { opacity: 0; transform: translateY(6px) rotate(-3deg); }
+  12%, 80% { opacity: 1; transform: translateY(0) rotate(-3deg); }
+  100% { opacity: 0; transform: translateY(-4px) rotate(-3deg); }
+}
+
 /* ASCII intro failsafe: only applies if JavaScript never starts the intro,
    so visitors without JS are never stuck behind it. */
 @keyframes ascii-intro-failsafe {
@@ -81,7 +154,7 @@
   }
 }
 .ascii-intro:not([data-js]) {
-  animation: ascii-intro-failsafe 0.3s ease 4s forwards;
+  animation: ascii-intro-failsafe 0.3s ease 7s forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {

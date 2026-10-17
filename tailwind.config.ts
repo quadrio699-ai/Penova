@@ -38,6 +38,7 @@ const config: Config = {
       fontFamily: {
         display: ["var(--font-display)", "system-ui", "sans-serif"],
         body: ["var(--font-body)", "Georgia", "serif"],
+        hand: ["var(--font-hand)", "cursive"],
       },
       maxWidth: {
         prose: "68ch",

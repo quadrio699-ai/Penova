@@ -66,6 +66,7 @@ export default function AsciiIntro() {
   const [leaving, setLeaving] = useState(false);
   const [stage, setStage] = useState<Stage>("assembling");
   const [touch, setTouch] = useState(false);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     const reduceMotion = window.matchMedia(
@@ -84,6 +85,14 @@ export default function AsciiIntro() {
       return;
     }
 
+    // On a very slow connection the CSS failsafe may already have hidden the
+    // overlay before JavaScript arrived. Don't pop the intro back in late.
+    const overlay = overlayRef.current;
+    if (overlay && getComputedStyle(overlay).visibility === "hidden") {
+      setVisible(false);
+      return;
+    }
+
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) {
@@ -93,7 +102,9 @@ export default function AsciiIntro() {
 
     // Tells the CSS failsafe that JavaScript is running, so it must not hide us.
     overlayRef.current?.setAttribute("data-js", "1");
-    setTouch(window.matchMedia("(pointer: coarse)").matches);
+    const coarse = window.matchMedia("(pointer: coarse)").matches;
+    setTouch(coarse);
+    const unlockDistance = coarse ? 200 : UNLOCK_DISTANCE;
 
     const root = document.documentElement;
     const previousOverflow = root.style.overflow;
@@ -131,7 +142,7 @@ export default function AsciiIntro() {
       const small = w < 700;
 
       size = small ? 5 : 8;
-      step = size + (small ? 2 : 3);
+      step = size + (small ? 1 : 3);
       cols = Math.floor(w / step);
       rows = Math.floor(h / step);
 
@@ -155,7 +166,7 @@ export default function AsciiIntro() {
       const probe = 100;
       sctx.font = `700 ${probe}px ${fontFamily}`;
       const measured = sctx.measureText(WORD).width || probe * 4;
-      const targetWidth = cols * (small ? 0.84 : 0.66);
+      const targetWidth = cols * (small ? 0.9 : 0.66);
       const fontPx = Math.min((probe * targetWidth) / measured, rows * 0.5);
       sctx.font = `700 ${fontPx}px ${fontFamily}`;
       sctx.fillText(WORD, cols / 2, rows / 2);
@@ -293,7 +304,7 @@ export default function AsciiIntro() {
       if (stageNow === "explore") {
         if (lastX >= 0) {
           travelled += Math.hypot(event.clientX - lastX, event.clientY - lastY);
-          if (travelled > UNLOCK_DISTANCE) changeStage("ready");
+          if (travelled > unlockDistance) changeStage("ready");
         }
         lastX = event.clientX;
         lastY = event.clientY;
@@ -335,6 +346,13 @@ export default function AsciiIntro() {
     fontReady.then(() => {
       if (cancelled) return;
       build(true);
+      if (cells.length < 30) {
+        // Sampling failed for some reason: skip the intro rather than
+        // leaving visitors on an empty screen.
+        finish();
+        return;
+      }
+      setReady(true);
       phaseStart = performance.now();
       raf = requestAnimationFrame(loop);
     });
@@ -367,6 +385,17 @@ export default function AsciiIntro() {
       }`}
     >
       <canvas ref={canvasRef} aria-hidden="true" className="block h-full w-full" />
+
+      {/* Shown from the first paint until the ASCII canvas is ready, so slow
+          connections never see an empty blue screen. */}
+      {!ready && (
+        <p
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 flex items-center justify-center font-display text-4xl font-bold text-paper/80 md:text-6xl"
+        >
+          PENOVA
+        </p>
+      )}
 
       {/* Skip is always available, so nobody is ever trapped behind the intro. */}
       <button
